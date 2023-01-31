@@ -77,8 +77,8 @@ github.com/dop251/goja_nodejs v0.0.0-20210225215109-d91c329300e7/go.mod h1:hn7BA
 github.com/dop251/goja_nodejs v0.0.0-20211022123610-8dd9abb0616d/go.mod h1:DngW8aVqWbuLRMHItjPUyqdj+HWPvnQe8V8y1nDpIbM=
 github.com/draganm/bolted v0.10.1 h1:SzG/e88ElhABlfrqxzDB9e+qt6Ql+TMIwLDxPR5cC1M=
 github.com/draganm/bolted v0.10.1/go.mod h1:JzpeZ2BmuDuMggRz3gVL+1qX2C6b8+6pTgILbrZPztw=
-github.com/draganm/event-buffer v0.0.5 h1:H19ukeeD0B/gTjuIRy0iPZ2FUNB9yEIargXAExnoCio=
-github.com/draganm/event-buffer v0.0.5/go.mod h1:yABnERo/wOSz2rzFjwgE70Glx/oWrxnK6xvHsbUvAsE=
+github.com/draganm/event-buffer v0.0.6 h1:GrsQLAmdbkUqq2eE1vs9yTRz9O9y+C/IAuzGkKKPoiI=
+github.com/draganm/event-buffer v0.0.6/go.mod h1:yABnERo/wOSz2rzFjwgE70Glx/oWrxnK6xvHsbUvAsE=
 github.com/envoyproxy/go-control-plane v0.9.0/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
 github.com/envoyproxy/go-control-plane v0.9.1-0.20191026205805-5f8ba28d4473/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
 github.com/envoyproxy/go-control-plane v0.9.4/go.mod h1:6rpuAdCZL397s3pYoYcLgu1mIlRU8Am5FuJP05cCM98=

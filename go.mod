@@ -42,7 +42,7 @@ require (
 	github.com/cucumber/godog v0.12.6
 	github.com/dop251/goja v0.0.0-20230128084908-78b980256d04
 	github.com/draganm/bolted v0.10.1
-	github.com/draganm/event-buffer v0.0.5
+	github.com/draganm/event-buffer v0.0.6
 	github.com/go-logr/zapr v1.2.3
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
