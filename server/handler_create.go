@@ -8,7 +8,7 @@ import (
 
 	"github.com/draganm/bolted"
 	"github.com/draganm/event-tap/data"
-	"github.com/draganm/event-tap/server/webhook"
+	"github.com/draganm/event-tap/server/tap"
 	"github.com/gofrs/uuid"
 )
 
@@ -41,11 +41,11 @@ func (s *Server) create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	webhookPath := tapsPath.Append(id.String())
+	tapPath := tapsPath.Append(id.String())
 
 	err = bolted.SugaredWrite(s.db, func(tx bolted.SugaredWriteTx) error {
-		tx.CreateMap(webhookPath)
-		tx.Put(webhookPath.Append("options"), tcd)
+		tx.CreateMap(tapPath)
+		tx.Put(tapPath.Append("options"), tcd)
 		return nil
 	})
 
@@ -55,12 +55,24 @@ func (s *Server) create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = webhook.Start(context.Background(), log, s.db, webhookPath, s.bufferClient)
+	ctx, cancel := context.WithCancel(context.Background())
+
+	defer func() {
+		if err != nil {
+			cancel()
+		}
+	}()
+
+	err = tap.Start(ctx, log, s.db, tapPath, s.bufferClient)
 	if err != nil {
-		http.Error(w, fmt.Errorf("could start webhook: %w", err).Error(), http.StatusInternalServerError)
-		log.Error(err, "clould start webhook")
+		http.Error(w, fmt.Errorf("could start tap: %w", err).Error(), http.StatusInternalServerError)
+		log.Error(err, "clould start tap")
 		return
 	}
+
+	s.mu.Lock()
+	s.tapCancels[id.String()] = cancel
+	s.mu.Unlock()
 
 	w.WriteHeader(http.StatusCreated)
 

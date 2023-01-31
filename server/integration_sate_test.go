@@ -18,6 +18,7 @@ type State struct {
 	webhookClient *client.Client
 	webhookURL    string
 	listResult    []data.TapListEntry
+	createdTapID  string
 }
 
 func getState(ctx context.Context) *State {

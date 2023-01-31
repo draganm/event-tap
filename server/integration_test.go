@@ -134,6 +134,8 @@ func InitializeScenario(ctx *godog.ScenarioContext) {
 	ctx.Step(`^there are no taps$`, thereAreNoTaps)
 	ctx.Step(`^there is one tap$`, thereIsOneTap)
 	ctx.Step(`^the result should have one tap$`, theResultShouldHaveOneTap)
+	ctx.Step(`^I delete the tap$`, iDeleteTheTap)
+	ctx.Step(`^the list of taps should not contain the deleted tap$`, theListOfTapsShouldNotContainTheDeletedTap)
 
 }
 
@@ -201,7 +203,7 @@ func theResultShouldBeEmpty(ctx context.Context) error {
 
 func thereIsOneTap(ctx context.Context) error {
 	s := getState(ctx)
-	_, err := s.tapClient.CreateTap(ctx, tapClient.CreateTapOptions{
+	id, err := s.tapClient.CreateTap(ctx, tapClient.CreateTapOptions{
 		Name:       "tap1",
 		Code:       `function mapEvents(evts){return evts.map(([id, evt]) => evt)}`,
 		WebhookURL: s.webhookURL,
@@ -212,6 +214,8 @@ func thereIsOneTap(ctx context.Context) error {
 		return fmt.Errorf("could not create tap: %w", err)
 	}
 
+	s.createdTapID = id
+
 	return nil
 }
 
@@ -221,5 +225,24 @@ func theResultShouldHaveOneTap(ctx context.Context) error {
 	if ln != 1 {
 		return fmt.Errorf("expected one tap, but got %d", ln)
 	}
+	return nil
+}
+
+func iDeleteTheTap(ctx context.Context) error {
+	s := getState(ctx)
+	return s.tapClient.Delete(ctx, s.createdTapID)
+}
+
+func theListOfTapsShouldNotContainTheDeletedTap(ctx context.Context) error {
+	s := getState(ctx)
+	listResult, err := s.tapClient.List(ctx)
+	if err != nil {
+		return fmt.Errorf("could not list taps: %w", err)
+	}
+
+	if len(listResult) != 0 {
+		return fmt.Errorf("tap was not deleted")
+	}
+
 	return nil
 }

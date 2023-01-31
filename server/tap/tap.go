@@ -1,4 +1,4 @@
-package webhook
+package tap
 
 import (
 	"bytes"
@@ -26,10 +26,10 @@ func Start(ctx context.Context, log logr.Logger, db bolted.Database, path dbpath
 	})
 
 	if err != nil {
-		return fmt.Errorf("could not load webhook options: %w", err)
+		return fmt.Errorf("could not load tap options: %w", err)
 	}
 
-	log = log.WithValues("webhook", opts.Name)
+	log = log.WithValues("tap", opts.Name)
 
 	prg, err := goja.Compile("webhook.js", opts.Code, true)
 	if err != nil {
@@ -117,9 +117,9 @@ func Start(ctx context.Context, log logr.Logger, db bolted.Database, path dbpath
 	go func() (err error) {
 		defer func() {
 			if err != nil {
-				log.Error(err, "webhook failed")
+				log.Error(err, "tap failed")
 			} else {
-				log.Info("webhook terminated")
+				log.Info("tap terminated")
 			}
 		}()
 

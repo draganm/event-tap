@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"sync"
 
 	"github.com/draganm/bolted"
 	"github.com/draganm/bolted/dbpath"
@@ -19,6 +20,8 @@ type Server struct {
 	http.Handler
 
 	bufferClient *client.Client
+	mu           *sync.Mutex
+	tapCancels   map[string]context.CancelFunc
 }
 
 var tapsPath = dbpath.ToPath("taps")
@@ -51,15 +54,18 @@ func New(log logr.Logger, db bolted.Database, bufferBaseURL string) (*Server, er
 		db:           db,
 		log:          log,
 		bufferClient: bufferClient,
+		mu:           &sync.Mutex{},
+		tapCancels:   map[string]context.CancelFunc{},
 	}
 
-	err = s.startWebhooks(context.Background())
+	err = s.startTaps(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("could not start webhooks: %w", err)
 	}
 
 	r.Methods("POST").Path("/taps").HandlerFunc(s.create)
 	r.Methods("GET").Path("/taps").HandlerFunc(s.list)
+	r.Methods("DELETE").Path("/taps/{tapID}").HandlerFunc(s.delete)
 
 	return s, nil
 }

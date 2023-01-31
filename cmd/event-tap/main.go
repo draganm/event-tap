@@ -5,6 +5,7 @@ import (
 
 	"github.com/draganm/event-tap/client"
 	"github.com/draganm/event-tap/cmd/event-tap/create"
+	"github.com/draganm/event-tap/cmd/event-tap/delete"
 	"github.com/draganm/event-tap/cmd/event-tap/ls"
 	"github.com/urfave/cli/v2"
 )
@@ -23,6 +24,7 @@ func main() {
 		Commands: []*cli.Command{
 			ls.Command(),
 			create.Command(),
+			delete.Command(),
 		},
 		EnableBashCompletion: true,
 		Before: func(c *cli.Context) error {
