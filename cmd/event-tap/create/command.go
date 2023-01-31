@@ -24,6 +24,10 @@ func Command() *cli.Command {
 				Name:     "code",
 				Required: true,
 			},
+			&cli.IntFlag{
+				Name:  "batch-limit",
+				Value: 100,
+			},
 		},
 
 		Action: func(c *cli.Context) error {
@@ -32,6 +36,7 @@ func Command() *cli.Command {
 				Name:       c.String("name"),
 				Code:       c.String("code"),
 				WebhookURL: c.String("webhook-url"),
+				BatchLimit: c.Int("batch-limit"),
 			})
 			if err != nil {
 				return fmt.Errorf("could not list taps: %w", err)
