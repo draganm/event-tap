@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -50,6 +51,11 @@ func New(log logr.Logger, db bolted.Database, bufferBaseURL string) (*Server, er
 		db:           db,
 		log:          log,
 		bufferClient: bufferClient,
+	}
+
+	err = s.startWebhooks(context.Background())
+	if err != nil {
+		return nil, fmt.Errorf("could not start webhooks: %w", err)
 	}
 
 	r.Methods("POST").Path("/taps").HandlerFunc(s.create)
