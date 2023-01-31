@@ -15,6 +15,8 @@ import (
 	"github.com/draganm/event-tap/server"
 	"github.com/go-logr/logr"
 	"github.com/go-logr/zapr"
+	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/urfave/cli/v2"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -52,6 +54,11 @@ func main() {
 				EnvVars: []string{"API_ADDR"},
 			},
 			&cli.StringFlag{
+				Name:    "metrics-addr",
+				Value:   ":3000",
+				EnvVars: []string{"METRICS_ADDR"},
+			},
+			&cli.StringFlag{
 				Name:    "event-buffer-base-url",
 				Value:   "http://localhost:5566",
 				EnvVars: []string{"EVENT_BUFFER_BASE_URL"},
@@ -67,6 +74,7 @@ func main() {
 				return fmt.Errorf("could not open state: %w", err)
 			}
 
+			// signal handler
 			eg.Go(func() error {
 				sigChan := make(chan os.Signal, 1)
 				signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
@@ -79,12 +87,18 @@ func main() {
 				}
 			})
 
+			// api server
 			s, err := server.New(log, db, c.String("event-buffer-base-url"))
 			if err != nil {
 				return fmt.Errorf("could not start server: %w", err)
 			}
 
 			eg.Go(runHttp(ctx, log, c.String("api-addr"), "api", s))
+
+			// run metrics server
+			metricsRouter := mux.NewRouter()
+			metricsRouter.Methods("GET").Path("/metrics").Handler(promhttp.Handler())
+			eg.Go(runHttp(ctx, log, c.String("metrics-addr"), "metrics", metricsRouter))
 
 			return eg.Wait()
 
