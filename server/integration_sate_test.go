@@ -5,6 +5,7 @@ import (
 
 	"github.com/draganm/event-buffer/client"
 	tapClient "github.com/draganm/event-tap/client"
+	"github.com/draganm/event-tap/data"
 )
 
 type StateKeyType string
@@ -16,6 +17,7 @@ type State struct {
 	tapClient     *tapClient.Client
 	webhookClient *client.Client
 	webhookURL    string
+	listResult    []data.TapListEntry
 }
 
 func getState(ctx context.Context) *State {

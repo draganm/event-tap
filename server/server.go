@@ -53,6 +53,7 @@ func New(log logr.Logger, db bolted.Database, bufferBaseURL string) (*Server, er
 	}
 
 	r.Methods("POST").Path("/taps").HandlerFunc(s.create)
+	r.Methods("GET").Path("/taps").HandlerFunc(s.list)
 
 	return s, nil
 }

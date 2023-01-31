@@ -12,6 +12,7 @@ import (
 	"github.com/cucumber/godog"
 	"github.com/draganm/event-buffer/client"
 	tapClient "github.com/draganm/event-tap/client"
+	"github.com/draganm/event-tap/data"
 	"github.com/draganm/event-tap/server/testrig"
 	"github.com/go-logr/logr"
 	"github.com/go-logr/zapr"
@@ -128,6 +129,11 @@ func InitializeScenario(ctx *godog.ScenarioContext) {
 	ctx.Step(`^I create a new map of events$`, iCreateANewMapOfEvents)
 	ctx.Step(`^one event in the buffer$`, oneEventInTheBuffer)
 	ctx.Step(`^the receiver should receive that event as webhook$`, theReceiverShouldReceiveThatEventAsWebhook)
+	ctx.Step(`^I list the taps$`, iListTheTaps)
+	ctx.Step(`^the result should be empty$`, theResultShouldBeEmpty)
+	ctx.Step(`^there are no taps$`, thereAreNoTaps)
+	ctx.Step(`^there is one tap$`, thereIsOneTap)
+	ctx.Step(`^the result should have one tap$`, theResultShouldHaveOneTap)
 
 }
 
@@ -166,6 +172,54 @@ func theReceiverShouldReceiveThatEventAsWebhook(ctx context.Context) error {
 	diff := cmp.Diff(evts, []any{"evt1"})
 	if diff != "" {
 		return fmt.Errorf("diff:\n%s", diff)
+	}
+	return nil
+}
+
+func thereAreNoTaps() error {
+	// already the case on the beginning of a test
+	return nil
+}
+
+func iListTheTaps(ctx context.Context) (err error) {
+	s := getState(ctx)
+	s.listResult, err = s.tapClient.List(ctx)
+	if err != nil {
+		return fmt.Errorf("could not list taps: %w", err)
+	}
+	return nil
+}
+
+func theResultShouldBeEmpty(ctx context.Context) error {
+	s := getState(ctx)
+	diff := cmp.Diff(s.listResult, []data.TapListEntry{})
+	if diff != "" {
+		return fmt.Errorf("diff:\n%s", diff)
+	}
+	return nil
+}
+
+func thereIsOneTap(ctx context.Context) error {
+	s := getState(ctx)
+	_, err := s.tapClient.CreateTap(ctx, tapClient.CreateTapOptions{
+		Name:       "tap1",
+		Code:       `function mapEvents(evts){return evts.map(([id, evt]) => evt)}`,
+		WebhookURL: s.webhookURL,
+		BatchLimit: 20,
+	})
+
+	if err != nil {
+		return fmt.Errorf("could not create tap: %w", err)
+	}
+
+	return nil
+}
+
+func theResultShouldHaveOneTap(ctx context.Context) error {
+	s := getState(ctx)
+	ln := len(s.listResult)
+	if ln != 1 {
+		return fmt.Errorf("expected one tap, but got %d", ln)
 	}
 	return nil
 }
