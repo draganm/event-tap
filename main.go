@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/draganm/bolted/embedded"
@@ -63,6 +66,18 @@ func main() {
 			if err != nil {
 				return fmt.Errorf("could not open state: %w", err)
 			}
+
+			eg.Go(func() error {
+				sigChan := make(chan os.Signal, 1)
+				signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+				select {
+				case sig := <-sigChan:
+					log.Info("received signal", "signal", sig.String())
+					return fmt.Errorf("received signal %s", sig.String())
+				case <-ctx.Done():
+					return nil
+				}
+			})
 
 			s, err := server.New(log, db, c.String("event-buffer-base-url"))
 			if err != nil {
